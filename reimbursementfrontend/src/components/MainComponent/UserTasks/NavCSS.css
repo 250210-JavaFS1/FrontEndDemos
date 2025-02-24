@@ -1,0 +1,10 @@
+/* Remove underline from links */
+.nav-item .nav-link {
+    text-decoration: none;
+    padding-right: 15px; /* Adding space between the links */
+  }
+  
+  /* Add blue color on hover */
+  .nav-item .nav-link:hover {
+    color: blue;
+  }

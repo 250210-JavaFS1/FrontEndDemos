@@ -1,7 +1,9 @@
 import { Container, Form, Button } from "react-bootstrap"
 import './loginCSS.css'
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios, { AxiosError, isAxiosError } from "axios";
+import { store } from "../GlobalData/store";
 
 export const Login: React.FC = () => {
 
@@ -15,6 +17,40 @@ export const Login: React.FC = () => {
 
     //Handle to navigate to register component
     const navigate=useNavigate();
+
+    //define states to store user's input
+    const [loginCreds, setLoginCreds]=useState({
+      username:"",
+      password:""
+    })
+
+    //define function to store data during onclick event
+    const storeValues=(event:React.ChangeEvent<HTMLInputElement>)=>{
+      const name=event.target.name
+      const value=event.target.value
+      setLoginCreds((loginCreds)=>({...loginCreds,[name]:value}))
+    }
+
+    //define a function to send user credential to server
+    const login=async()=>{
+      try{
+        const response=await axios.post("http://localhost:8080/auth/login",loginCreds)
+
+        store.loggedInUser=response.data
+        alert(store.loggedInUser.firstName+" "+store.loggedInUser.lastName+" has logged in welcome")
+        
+        if(store.loggedInUser.role=="user"){
+          navigate("/userdashboard")
+        }else{
+          navigate("/managerdashboard")
+        }
+
+      }catch(error:unknown|AxiosError){
+        if(error instanceof AxiosError){
+          alert(error.response?.data)
+        }
+      }
+    }
 
 
     return (
@@ -43,6 +79,7 @@ export const Login: React.FC = () => {
                       placeholder="Enter a valid Username"
                       name="username"
                       ref={usernameRef}
+                      onChange={storeValues}
                     />
 
                   </div>
@@ -55,6 +92,7 @@ export const Login: React.FC = () => {
                       className="form-control form-control-lg"
                       placeholder="Enter password"
                       name="password"
+                      onChange={storeValues}
                     />
                   </div>
   
@@ -81,6 +119,7 @@ export const Login: React.FC = () => {
                       type="button"
                       className="btn btn-primary btn-lg"
                       style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+                      onClick={login}
                     >
                       Login
                     </Button>
